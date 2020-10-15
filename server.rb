@@ -6,6 +6,7 @@ require 'webrick'
 require './expense'
 
 OSO ||= Oso.new
+OSO.register_class(Expense)
 OSO.load_file('expenses.polar')
 
 WEBrick::HTTPServer.new(Port: 5050).tap do |server|
