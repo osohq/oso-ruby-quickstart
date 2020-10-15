@@ -18,7 +18,7 @@ WEBrick::HTTPServer.new(Port: 5050).tap do |server|
     # or the requested expense ID doesn't exist in our "database"
     if resource != 'expenses' || expense.nil?
       res.status = 404
-      res.body = 'Not Found!'
+      res.body = "Not Found!\n"
       next
     end
 
@@ -26,10 +26,10 @@ WEBrick::HTTPServer.new(Port: 5050).tap do |server|
     action = req.request_method
 
     if OSO.allowed?(actor: actor, action: action, resource: expense)
-      res.body = expense.inspect
+      res.body = expense.inspect + "\n"
     else
       res.status = 403
-      res.body = 'Not Authorized!'
+      res.body = "Not Authorized!\n"
     end
   end
   server.start
