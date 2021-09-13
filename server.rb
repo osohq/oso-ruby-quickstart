@@ -1,37 +1,27 @@
 # frozen_string_literal: true
 
 require 'oso'
-require 'webrick'
+require 'sinatra'
 
-require './expense'
+require_relative 'models'
 
-OSO ||= Oso.new
-OSO.register_class(Expense)
-OSO.load_file('expenses.polar')
+OSO = Oso.new
 
-WEBrick::HTTPServer.new(Port: 5050).tap do |server|
-  server.mount_proc '/' do |req, res|
-    _, resource, id = req.path.split('/')
-    # Look up the requested expense in our "database"
-    expense = DB[id.to_i]
+OSO.register_class(User)
+OSO.register_class(Repository)
 
-    # 404 if the requested path doesn't match /expenses/:id
-    # or the requested expense ID doesn't exist in our "database"
-    if resource != 'expenses' || expense.nil?
-      res.status = 404
-      res.body = "Not Found!\n"
-      next
-    end
+OSO.load_files(["main.polar"])
 
-    actor = req.header['user']&.first
-    action = req.request_method
+get '/repo/:name' do
+  repo = Repository.get_by_name(params['name'])
 
-    if OSO.allowed?(actor: actor, action: action, resource: expense)
-      res.body = expense.inspect + "\n"
-    else
-      res.status = 403
-      res.body = "Not Authorized!\n"
-    end
+  begin
+    OSO.authorize(User.get_current_user, "read", repo)
+    "<h1>A Repo</h1><p>Welcome to repo #{repo.name}</p>"
+  rescue Oso::NotFoundError
+    status 404
+    "<h1>Whoops!</h1><p>Repo named #{params['name']} was not found</p>"
   end
-  server.start
 end
+
+set :port, 5000
