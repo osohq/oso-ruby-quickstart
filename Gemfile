@@ -2,7 +2,7 @@
 
 source "https://rubygems.org"
 
-gem "oso-oso", "0.21.0"
+gem "oso-oso", "0.24.0"
 gem "sinatra"
 gem "test-unit"
 gem "rack-test"
